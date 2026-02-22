@@ -2,7 +2,11 @@
 
 A 3D endless car racing game built with Godot 4.x. Dodge obstacles across three lanes, rack up points, and chase your high score.
 
-Built with [Kenney Racing Kit](https://kenney.nl/assets/racing-kit) assets (CC0 licensed).
+<p align="center">
+  <img src="media/gameplay.gif" alt="Lane Dash gameplay" width="600">
+</p>
+
+Built with [Kenney Racing Kit](https://kenney.nl/assets/racing-kit) and [Quaternius Textured LowPoly Trees](https://quaternius.itch.io/textured-lowpoly-trees) assets (CC0 licensed).
 
 ## Gameplay
 
@@ -47,4 +51,5 @@ assets/kenney_racing_kit/    # 3D models (GLB), textures
 ## Credits
 
 - Game assets: [Kenney Racing Kit](https://kenney.nl/assets/racing-kit) (CC0 1.0)
+- Tree models: [Quaternius Textured LowPoly Trees](https://quaternius.itch.io/textured-lowpoly-trees) (CC0)
 - Engine: [Godot Engine](https://godotengine.org/)

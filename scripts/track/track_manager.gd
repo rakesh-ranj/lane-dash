@@ -29,17 +29,28 @@ const OBSTACLE_SPAWN_CHANCE: float = 0.35
 
 var ROAD_SCENE_PATH: String = "res://assets/kenney_racing_kit/models/roadStraightLong.glb"
 
-var DECORATION_SCENE_PATHS: Array[String] = [
-	"res://assets/kenney_racing_kit/models/treeSmall.glb",
-	"res://assets/kenney_racing_kit/models/treeLarge.glb",
+var TREE_SCENE_PATHS: Array[String] = [
+	"res://assets/quaternius_trees/Tree_01.fbx",
+	"res://assets/quaternius_trees/Tree_02.fbx",
+	"res://assets/quaternius_trees/Tree_03.fbx",
+	"res://assets/quaternius_trees/Tree_04.fbx",
+	"res://assets/quaternius_trees/Tree_05.fbx",
+]
+
+var LIGHT_SCENE_PATHS: Array[String] = [
 	"res://assets/kenney_racing_kit/models/lightPostLarge.glb",
 	"res://assets/kenney_racing_kit/models/lightPostModern.glb",
+]
+
+var GRANDSTAND_SCENE_PATHS: Array[String] = [
 	"res://assets/kenney_racing_kit/models/grandStand.glb",
 	"res://assets/kenney_racing_kit/models/grandStandCovered.glb",
+]
+
+var TENT_SCENE_PATHS: Array[String] = [
 	"res://assets/kenney_racing_kit/models/tent.glb",
 	"res://assets/kenney_racing_kit/models/tentLong.glb",
 	"res://assets/kenney_racing_kit/models/tentClosed.glb",
-	"res://assets/kenney_racing_kit/models/billboard.glb",
 ]
 
 var OBSTACLE_SCENE_PATHS: Array[String] = [
@@ -53,7 +64,10 @@ var OBSTACLE_TEMPLATE_PATH: String = "res://scenes/obstacles/obstacle.tscn"
 # ── Variables ────────────────────────────────────────────────────────────────
 
 var road_scene: PackedScene = null
-var decoration_scenes: Array[PackedScene] = []
+var tree_scenes: Array[PackedScene] = []
+var light_scenes: Array[PackedScene] = []
+var grandstand_scenes: Array[PackedScene] = []
+var tent_scenes: Array[PackedScene] = []
 var obstacle_visual_scenes: Array[PackedScene] = []
 var obstacle_template: PackedScene = null
 var _rows_since_last_obstacle: int = 0
@@ -99,9 +113,21 @@ func _preload_scenes() -> void:
 	else:
 		push_error("TrackManager: road scene not found – %s" % ROAD_SCENE_PATH)
 
-	for path in DECORATION_SCENE_PATHS:
+	for path in TREE_SCENE_PATHS:
 		if ResourceLoader.exists(path):
-			decoration_scenes.append(load(path) as PackedScene)
+			tree_scenes.append(load(path) as PackedScene)
+
+	for path in LIGHT_SCENE_PATHS:
+		if ResourceLoader.exists(path):
+			light_scenes.append(load(path) as PackedScene)
+
+	for path in GRANDSTAND_SCENE_PATHS:
+		if ResourceLoader.exists(path):
+			grandstand_scenes.append(load(path) as PackedScene)
+
+	for path in TENT_SCENE_PATHS:
+		if ResourceLoader.exists(path):
+			tent_scenes.append(load(path) as PackedScene)
 
 	for path in OBSTACLE_SCENE_PATHS:
 		if ResourceLoader.exists(path):
@@ -165,43 +191,42 @@ func _recycle_rows() -> void:
 # ── Decorations ──────────────────────────────────────────────────────────────
 
 func _add_decorations(row: Node3D) -> void:
-	if decoration_scenes.is_empty():
-		return
-
 	# Trees – 35 % chance per side.
-	for side_sign in [-1.0, 1.0]:
-		if rng.randf() < 0.35:
-			var tree_idx: int = rng.randi_range(0, mini(1, decoration_scenes.size() - 1))
-			var tree: Node3D = decoration_scenes[tree_idx].instantiate() as Node3D
-			tree.position.x = side_sign * rng.randf_range(DECORATION_INNER_X, DECORATION_OUTER_X)
-			tree.rotation.y = rng.randf_range(0.0, TAU)
-			tree.add_to_group("decoration")
-			row.add_child(tree)
+	if not tree_scenes.is_empty():
+		for side_sign in [-1.0, 1.0]:
+			if rng.randf() < 0.35:
+				var tree_idx: int = rng.randi_range(0, tree_scenes.size() - 1)
+				var tree: Node3D = tree_scenes[tree_idx].instantiate() as Node3D
+				tree.position.x = side_sign * rng.randf_range(DECORATION_INNER_X, DECORATION_OUTER_X)
+				tree.rotation.y = rng.randf_range(0.0, TAU)
+				tree.scale = Vector3(0.5, 0.5, 0.5)
+				tree.add_to_group("decoration")
+				row.add_child(tree)
 
 	# Light posts – ~15 % chance.
-	if rng.randf() < 0.15 and decoration_scenes.size() >= 4:
+	if rng.randf() < 0.15 and not light_scenes.is_empty():
 		for side_sign in [-1.0, 1.0]:
-			var light_idx: int = rng.randi_range(2, 3)
-			var light: Node3D = decoration_scenes[light_idx].instantiate() as Node3D
+			var light_idx: int = rng.randi_range(0, light_scenes.size() - 1)
+			var light: Node3D = light_scenes[light_idx].instantiate() as Node3D
 			light.position.x = side_sign * (DECORATION_INNER_X + 0.3)
 			light.add_to_group("decoration")
 			row.add_child(light)
 
 	# Grandstands – rare.
-	if rng.randf() < 0.03 and decoration_scenes.size() >= 6:
+	if rng.randf() < 0.03 and not grandstand_scenes.is_empty():
 		var side_sign: float = -1.0 if rng.randf() < 0.5 else 1.0
-		var gs_idx: int = rng.randi_range(4, 5)
-		var gs: Node3D = decoration_scenes[gs_idx].instantiate() as Node3D
+		var gs_idx: int = rng.randi_range(0, grandstand_scenes.size() - 1)
+		var gs: Node3D = grandstand_scenes[gs_idx].instantiate() as Node3D
 		gs.position.x = side_sign * (DECORATION_OUTER_X + 1.0)
 		gs.rotation.y = PI / 2.0 * side_sign
 		gs.add_to_group("decoration")
 		row.add_child(gs)
 
 	# Tents – very rare.
-	if rng.randf() < 0.04 and decoration_scenes.size() >= 9:
+	if rng.randf() < 0.04 and not tent_scenes.is_empty():
 		var side_sign: float = -1.0 if rng.randf() < 0.5 else 1.0
-		var tent_idx: int = rng.randi_range(6, 8)
-		var tent: Node3D = decoration_scenes[tent_idx].instantiate() as Node3D
+		var tent_idx: int = rng.randi_range(0, tent_scenes.size() - 1)
+		var tent: Node3D = tent_scenes[tent_idx].instantiate() as Node3D
 		tent.position.x = side_sign * rng.randf_range(DECORATION_OUTER_X, DECORATION_OUTER_X + 2.0)
 		tent.rotation.y = rng.randf_range(0.0, TAU)
 		tent.add_to_group("decoration")
