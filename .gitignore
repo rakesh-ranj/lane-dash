@@ -1,0 +1,8 @@
+# Godot
+.godot/
+
+# macOS
+.DS_Store
+
+# Claude Code
+.claude/

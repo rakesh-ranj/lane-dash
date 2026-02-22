@@ -1,0 +1,151 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/track/track_manager.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player/player_car.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4"]
+[ext_resource type="Script" path="res://scripts/ui/countdown_overlay.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/game_controller.gd" id="6"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
+sky_top_color = Color(0.349, 0.565, 0.855, 1)
+sky_horizon_color = Color(0.647, 0.757, 0.894, 1)
+ground_bottom_color = Color(0.2, 0.169, 0.133, 1)
+ground_horizon_color = Color(0.647, 0.757, 0.894, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ProceduralSkyMaterial_1")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+tonemap_mode = 3
+tonemap_white = 6.0
+ssao_enabled = false
+glow_enabled = true
+glow_intensity = 0.4
+glow_bloom = 0.1
+glow_hdr_threshold = 0.8
+fog_enabled = true
+fog_light_color = Color(0.647, 0.757, 0.894, 1)
+fog_density = 0.006
+fog_sky_affect = 0.5
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+size = Vector2(200, 200)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.2, 0.45, 0.25, 1)
+roughness = 0.95
+
+[node name="Game" type="Node3D"]
+script = ExtResource("6")
+
+[node name="WorldRoot" type="Node3D" parent="."]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="WorldRoot"]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldRoot"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 10, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 1.2
+shadow_enabled = true
+directional_shadow_mode = 2
+directional_shadow_max_distance = 80.0
+
+[node name="GroundPlane" type="MeshInstance3D" parent="WorldRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0)
+mesh = SubResource("PlaneMesh_ground")
+surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+
+[node name="PlayerCar" parent="WorldRoot" instance=ExtResource("3")]
+
+[node name="TrackManager" type="Node3D" parent="WorldRoot"]
+script = ExtResource("1")
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="HUD" parent="UILayer" instance=ExtResource("4")]
+
+[node name="CountdownOverlay" type="Control" parent="UILayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("5")
+
+[node name="CountLabel" type="Label" parent="UILayer/CountdownOverlay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -60.0
+offset_right = 100.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 96
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PauseMenu" type="Control" parent="UILayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+process_mode = 3
+
+[node name="PauseBG" type="ColorRect" parent="UILayer/PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="PauseVBox" type="VBoxContainer" parent="UILayer/PauseMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -100.0
+offset_right = 120.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="PauseLabel" type="Label" parent="UILayer/PauseMenu/PauseVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="UILayer/PauseMenu/PauseVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 45)
+theme_override_font_sizes/font_size = 24
+text = "RESUME"
+
+[node name="EndRunButton" type="Button" parent="UILayer/PauseMenu/PauseVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 45)
+theme_override_font_sizes/font_size = 24
+text = "END RUN"
